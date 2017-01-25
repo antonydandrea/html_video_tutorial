@@ -4,16 +4,87 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Part 1: The Basics</title>
+        <title>Part 2: Customised Controls</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     </head>
     <body>
         <h1>Welcome To My Video Player</h1>
         <div id="video_container">
-            <video id="my_player" controls>
+            <video id="my_player">
                 <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" type="video/mp4" />
                 <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
                 Your web browser does not support video. Please upgrade it to view this video.
             </video>
         </div>
+        <div id="video_controls">
+            <button id="play">Play</button>
+            <p>Seek: </p>
+            <button id="seek_beginning">Restart</button>
+            <button id="seek_forward">+10</button>
+            <button id="seek_backwards">-10</button>
+            <p>Volume: </p>
+            <button id="volume_up">+</button>
+            <button id="volume_down">-</button>
+            <button id="volume_mute">Mute</button>
+        </div>
+        <script type="text/javascript">
+            //var player = $('#my_player').get(0)
+            var player = document.getElementById('my_player');
+            var playing = false;
+            var muted = false;
+            $('#play').click(function(e){
+                e.preventDefault();
+                if (!playing) {
+                    player.play();
+                    $(this).html('Pause');
+                    playing = true;
+                } else {
+                    player.pause();
+                    $(this).html('Play');
+                    playing = false;
+                }
+            });
+            $('#seek_beginning').click(function(e){
+                e.preventDefault();
+                player.currentTime = 0;
+            });
+            $('#seek_forward').click(function(e){
+                e.preventDefault();
+                player.currentTime = player.currentTime + 10;
+            });
+            $('#seek_backwards').click(function(e){
+                e.preventDefault();
+                player.currentTime = player.currentTime - 10;
+            });
+            $('#volume_up').click(function(e){
+                e.preventDefault();
+                player.muted = false;
+                muted = false;
+                $('#volume_mute').html('Mute');
+                var newVolume = player.volume + 0.1;
+                if (newVolume > 1) {
+                    newVolume = 1;
+                }
+                player.volume = newVolume;
+            });
+            $('#volume_down').click(function(e){
+                e.preventDefault();
+                var newVolume = player.volume - 0.1;
+                if (newVolume < 0) {
+                    newVolume = 0;
+                }
+                player.volume = newVolume;
+            });
+            $('#volume_mute').click(function(e){
+                e.preventDefault();
+                muted = !muted;
+                player.muted = muted;
+                if (muted == false) {
+                    $(this).html('Mute');
+                } else {
+                    $(this).html('Unmute');
+                }
+            });
+        </script>
     </body>
 </html>
