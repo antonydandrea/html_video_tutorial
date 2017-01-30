@@ -17,12 +17,13 @@
             </video>
         </div>
         <div id="video_controls">
+            <p>Time: <span id="time">0:00</span>/<span id="duration">0:00</span></p>
             <button id="play">Play</button>
             <p>Seek: </p>
             <button id="seek_beginning">Restart</button>
             <button id="seek_forward">+10</button>
             <button id="seek_backwards">-10</button>
-            <p>Volume: </p>
+            <p>Volume: <span id="volume"></span></p>
             <button id="volume_up">+</button>
             <button id="volume_down">-</button>
             <button id="volume_mute">Mute</button>
@@ -30,20 +31,35 @@
         <script type="text/javascript">
             //var player = $('#my_player').get(0)
             var player = document.getElementById('my_player');
-            var playing = false;
             var muted = false;
             $('#play').click(function(e){
                 e.preventDefault();
-                if (!playing) {
+                if (player.paused) {
                     player.play();
-                    $(this).html('Pause');
-                    playing = true;
                 } else {
                     player.pause();
-                    $(this).html('Play');
-                    playing = false;
                 }
             });
+            player.onplay = function() {
+                $('#play').html('Pause');
+            }
+            player.onpause = function() {
+                $('#play').html('Play');
+            }
+            player.ontimeupdate = function() {
+                $('#time').html(player.currentTime);
+            }
+            player.onloadedmetadata = function() {
+                $('#duration').html(player.duration);
+                $('#volume').html(player.volume);
+            }
+            player.onvolumechange = function() {
+                if (player.muted) {
+                    $('#volume').html(0);
+                } else {
+                    $('#volume').html(player.volume);
+                }
+            }
             $('#seek_beginning').click(function(e){
                 e.preventDefault();
                 player.currentTime = 0;
