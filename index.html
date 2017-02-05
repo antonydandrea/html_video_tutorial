@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Part 3: Media Events</title>
+        <title>Part 4: Styling</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     </head>
     <body>
@@ -17,18 +17,27 @@
             </video>
         </div>
         <div id="video_controls">
-            <p>Time: <span id="time">0:00</span>/<span id="duration">0:00</span></p>
             <button id="play">Play</button>
             <p>Seek: </p>
+            <progress id='progress_bar' min='0' max='100' value='0'></progress><span id="time">0:00</span>/<span id="duration">0:00</span>
             <button id="seek_beginning">Restart</button>
             <button id="seek_forward">+10</button>
             <button id="seek_backwards">-10</button>
+            
             <p>Volume: <span id="volume"></span></p>
             <button id="volume_up">+</button>
             <button id="volume_down">-</button>
             <button id="volume_mute">Mute</button>
         </div>
         <script type="text/javascript">
+            var formatTime = function(time) {
+                var minutes = Math.floor(time / 60);
+                var seconds =  Math.floor(time - minutes * 60);
+                return  str_pad_left(minutes, '0', 2) + ':' + str_pad_left(seconds, '0', 2); 
+            };
+            var str_pad_left = function(string, pad, length) {
+                return (new Array(length + 1).join(pad) + string).slice(-length);
+            }
             //var player = $('#my_player').get(0)
             var player = document.getElementById('my_player');
             var muted = false;
@@ -47,10 +56,12 @@
                 $('#play').html('Play');
             }
             player.ontimeupdate = function() {
-                $('#time').html(player.currentTime);
+                var percentage = Math.floor((player.currentTime / player.duration) * 100);
+                document.getElementById('progress_bar').value = percentage;
+                $('#time').html(formatTime(player.currentTime));
             }
             player.onloadedmetadata = function() {
-                $('#duration').html(player.duration);
+                $('#duration').html(formatTime(player.duration));
                 $('#volume').html(player.volume);
             }
             player.onvolumechange = function() {
