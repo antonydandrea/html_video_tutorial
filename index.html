@@ -6,28 +6,168 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Part 4: Styling</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <style>
+            #video_controls {
+                width: 640px;
+                background-color: #333;
+                color: #FFF;
+            }
+            #play, #seek_beginning {
+                border: 0;
+                width: 30px;
+                height: 30px;
+                margin-left: 5px;
+                margin-right: 5px;
+                background-color: #CCC;
+                color: #FFF
+            }
+            #play:hover, #seek_beginning:hover {
+                background-color: #666;
+            }
+            #play:focus, #seek_beginning:focus {
+                background-color: #666;
+            }
+            #progress_bar {
+                width: 400px;
+                vertical-align:middle;
+            }
+            #volume_container {
+                display: inline-block;
+            }
+            #volume_container:hover {
+                cursor: pointer;
+                background-color: #666;
+            }
+            #volume_container span {
+                display: none;
+                position: absolute;
+                z-index: 2;
+                height: 30px;
+                width: 150px;
+                top: 360px;
+                left: 533px;
+                background-color: #666;
+                -ms-transform: rotate(270deg); /* IE 9 */
+                -webkit-transform: rotate(270deg); /* Chrome, Safari, Opera */
+                transform: rotate(270deg);
+            }
+            
+            #progress_bar{
+                -webkit-appearance: none;
+                /* fix for FF unable to apply focus style bug  */
+                border: 1px solid #CCC; 
+
+                /*required for proper track sizing in FF*/
+                width: 400px;
+                height: 5px;
+            }
+            #progress_bar:focus {
+                outline: none;
+            }
+            
+            /* Chrome */
+            #progress_bar::-webkit-slider-runnable-track {
+                width: 400px;
+                height: 5px;
+                background: #ccc;
+                border: none;
+                border-radius: 3px;
+            }
+            #progress_bar::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                border: none;
+                height: 16px;
+                width: 16px;
+                border-radius: 50%;
+                background: #CCC;
+                margin-top: -4px;
+            }
+            #progress_bar::-webkit-slider-thumb:hover {
+                background: #000;
+            }
+            #progress_bar:focus::-webkit-slider-runnable-track {
+                background: #CCC;
+            }
+            
+            /* Firefox */
+            #progress_bar::-moz-range-track {
+                width: 400px;
+                height: 5px;
+                background: #ddd;
+                border: none;
+                border-radius: 3px;
+            }
+            #progress_bar::-moz-range-thumb {
+                border: none;
+                height: 16px;
+                width: 16px;
+                border-radius: 50%;
+                background: #CCC;
+            }
+            
+            #progress_bar::-moz-range-thumb:hover {
+                background: #000;
+            }
+
+            /*hide the outline behind the border*/
+            #progress_bar:-moz-focusring{
+                outline: 1px solid #CCC;
+                outline-offset: -1px;
+            }
+
+            #progress_bar:focus::-moz-range-track {
+                background: #ccc;
+            }
+            
+            #progress_bar::-moz-range-progress {
+                background: #222;
+            }
+            
+            /* IE/Edge */
+            #progress_bar::-ms-track {
+                width: 400px;
+                height: 5px;
+                /*leave room for the larger thumb to overflow with a transparent border */
+                border-color: transparent;
+                border-width: 6px 0;
+                /*remove default tick marks*/
+                color: transparent;
+            }
+            #progress_bar::-ms-fill-lower {
+                background: #222;
+                border-radius: 10px;
+            }
+            #progress_bar::-ms-fill-upper {
+                background: #ccc;
+                border-radius: 10px;
+            }
+            #progress_bar::-ms-thumb {
+                border: none;
+                height: 16px;
+                width: 16px;
+                border-radius: 50%;
+                background: #CCC;
+            }
+        </style>
     </head>
     <body>
         <h1>Welcome To My Video Player</h1>
         <div id="video_container">
-            <video id="my_player">
+            <video id="my_player" width="640" height="360">
                 <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" type="video/mp4" />
                 <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
                 Your web browser does not support video. Please upgrade it to view this video.
             </video>
         </div>
         <div id="video_controls">
-            <button id="play">Play</button>
-            <p>Seek: </p>
-            <progress id='progress_bar' min='0' max='100' value='0'></progress><span id="time">0:00</span>/<span id="duration">0:00</span>
-            <button id="seek_beginning">Restart</button>
-            <button id="seek_forward">+10</button>
-            <button id="seek_backwards">-10</button>
-            
-            <p>Volume: <span id="volume"></span></p>
-            <button id="volume_up">+</button>
-            <button id="volume_down">-</button>
-            <button id="volume_mute">Mute</button>
+            <button id="play">&#9658;</button><button id="seek_beginning">&#8635;</button><span id="time">00:00</span>/<span id="duration">00:00</span>
+            <input id="progress_bar" type="range" min='0' max='100' value='0'/>
+            <div id="volume_container">
+                <span>
+                    <input id="volume_bar" type="range" min='0' max='1' value='0' step='0.1' />
+                </span>
+                <p>Volume</p>
+            </div>
         </div>
         <script type="text/javascript">
             var formatTime = function(time) {
@@ -40,7 +180,21 @@
             }
             //var player = $('#my_player').get(0)
             var player = document.getElementById('my_player');
-            var muted = false;
+            $('#volume_container').hover(function(e) {
+                e.preventDefault;
+                $(this).children('span').toggle();
+            });
+            $('#volume_container > p').click(function(e) {
+                e.preventDefault();
+                player.muted = !player.muted;
+                if (!player.muted) {
+                    $(this).css('text-decoration', 'none');
+                    $('#volume_bar').removeAttr('disabled');
+                } else {
+                   $(this).css('text-decoration', 'line-through');
+                    $('#volume_bar').attr('disabled', 1);
+                }
+            });
             $('#play').click(function(e){
                 e.preventDefault();
                 if (player.paused) {
@@ -50,11 +204,16 @@
                 }
             });
             player.onplay = function() {
-                $('#play').html('Pause');
+                $('#play').html('&#10074;&#10074;');
             }
             player.onpause = function() {
-                $('#play').html('Play');
+                $('#play').html('&#9658;');
             }
+            $('#progress_bar').on('input', function() {
+                var time = Math.floor((this.value / 100) * player.duration);
+                player.currentTime = time;
+                $('#time').html(formatTime(player.currentTime));
+            });
             player.ontimeupdate = function() {
                 var percentage = Math.floor((player.currentTime / player.duration) * 100);
                 document.getElementById('progress_bar').value = percentage;
@@ -62,55 +221,21 @@
             }
             player.onloadedmetadata = function() {
                 $('#duration').html(formatTime(player.duration));
-                $('#volume').html(player.volume);
+                document.getElementById('volume_bar').value = player.volume;
             }
+            $('#volume_bar').on('input', function() {
+                player.volume = this.value;
+            });
             player.onvolumechange = function() {
                 if (player.muted) {
-                    $('#volume').html(0);
+                    document.getElementById('volume_bar').value = 0;
                 } else {
-                    $('#volume').html(player.volume);
+                    document.getElementById('volume_bar').value = player.volume;
                 }
             }
             $('#seek_beginning').click(function(e){
                 e.preventDefault();
                 player.currentTime = 0;
-            });
-            $('#seek_forward').click(function(e){
-                e.preventDefault();
-                player.currentTime = player.currentTime + 10;
-            });
-            $('#seek_backwards').click(function(e){
-                e.preventDefault();
-                player.currentTime = player.currentTime - 10;
-            });
-            $('#volume_up').click(function(e){
-                e.preventDefault();
-                player.muted = false;
-                muted = false;
-                $('#volume_mute').html('Mute');
-                var newVolume = player.volume + 0.1;
-                if (newVolume > 1) {
-                    newVolume = 1;
-                }
-                player.volume = newVolume;
-            });
-            $('#volume_down').click(function(e){
-                e.preventDefault();
-                var newVolume = player.volume - 0.1;
-                if (newVolume < 0) {
-                    newVolume = 0;
-                }
-                player.volume = newVolume;
-            });
-            $('#volume_mute').click(function(e){
-                e.preventDefault();
-                muted = !muted;
-                player.muted = muted;
-                if (muted == false) {
-                    $(this).html('Mute');
-                } else {
-                    $(this).html('Unmute');
-                }
             });
         </script>
     </body>
